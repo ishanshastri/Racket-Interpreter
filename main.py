@@ -11,9 +11,11 @@ functions['*'] = lambda a: (lambda b:b*a)
 functions['/'] = lambda a: (lambda b:a/b)
 functions['expt'] = lambda a: (lambda b:a**b)
 functions['abs'] = lambda a: abs(a)
-
+functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))
 #def new_function(rfunc):
     
+#Complicated Funcsions#
+#def __cond_()
 
 def validate(exp):
     #STUB-TODO
@@ -25,7 +27,9 @@ def is_function(val):
 def preprocess(exp):
     #add spaces where necc
     result = []
-
+    #exp = exp.replace("true", "lambda x: (lambda y: x)")
+    #exp = exp.replace("false", "lambda x: (lambda y: y)")
+    #print(exp)
     for i in range(len(exp)-1):
         result.append(exp[i])
         if (exp[i+1]==")" and exp[i]!=' ') or (exp[i]=="(" and exp[i]!=' '):
@@ -86,7 +90,12 @@ def eval_expr(exp):
 def eval_expr_lambda(exp):
     #print(exp)
     if '(' not in exp:
-        return float(exp) # Revise for non-numerical cases
+        if exp=="true":
+            return True
+        elif exp=="false":
+            return False
+        else:
+            return float(exp) # Revise for non-numerical cases
 
     exp = extr_expr(exp)
     op = exp[0]
@@ -179,10 +188,15 @@ print(eval_expr_lambda("(f 2 1 1)"))
 #expi = lambda x: lambda y: lambda z: eval_expr_lambda(sub_val("(define (f x y z) (* z (+ x y)))", [x, y, z]))
 #print("Example: ", expi('1')('2')('2'))
 
-expr = "(+ 9 0 9 (- 9 8 ) (* 2 4 (- 8 9 ) (/ 7 6)))"
+expr = "(+ 9 0 9 (f (- (f 2 1 1) 1) 1 1) (- 9 8 ) (* 2 4 (- 8 9 ) (/ 7 6)))"
+print(eval_expr_lambda(expr))
+#print(eval_expr_lambda("(true 9 8)"))
 #print(petvalu_expr("(define (f x y z) (* z (+ x y)))"))
 #run(expr) #input string from file
 #print(preprocess(expr))
 
 #fac = lambda n : 1 if n == 0 else n * fac(n-1)
 #print(fac(5))
+print(eval_expr_lambda("(if true 9 8)"))
+iff = lambda a: (lambda b: (lambda c: b if(a) else c))
+#print(iff(False)(2)("idk"))
