@@ -2,6 +2,7 @@ import numpy as np
 import  math
 import ast
 
+
 functions = {}#funcs
 
 #Elementry ops:
@@ -11,11 +12,23 @@ functions['*'] = lambda a: (lambda b:b*a)
 functions['/'] = lambda a: (lambda b:a/b)
 functions['expt'] = lambda a: (lambda b:a**b)
 functions['abs'] = lambda a: abs(a)
-functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))
+
+#Bool Funcs
+functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))#__freeze(not(a), c)))
+functions['or'] = lambda a: (lambda b: a or b)
+functions['and'] = lambda a: (lambda b: a and b)
+functions['='] = lambda a: (lambda b: (a==b))
+functions['Y'] = lambda f: lambda x: f(Y(f))(x)#lambda f: (lambda x: f())
 #def new_function(rfunc):
     
 #Complicated Funcsions#
 #def __cond_()
+
+def __freeze(flag, val):
+    if flag:
+        val
+    else:
+        0
 
 def validate(exp):
     #STUB-TODO
@@ -158,6 +171,7 @@ def add_func(rfunc):
     for p in defn[1]:
         lamb_expr += 'lambda ' + p + ': ' 
     args = get_func_def(rfunc)[1].copy()
+    #print(lamb_expr)
     #print(str(ast.literal_eval(args)))
     stringify = np.vectorize(str)
     #print(str(stringify(np.array(args)).ravel()))
@@ -170,6 +184,7 @@ def add_func(rfunc):
     #print(stringified_args)
     #lamb_expr += 'eval_expr_lambda(sub_val(\"' + rfunc + '\", ' +  str(stringify(np.array(args)).ravel()) + '))'
     lamb_expr += 'eval_expr_lambda(sub_val(\"' + rfunc + '\", ' +  stringified_args + '))'
+    #print(lamb_expr)
     #print(rfunc, " d")
     #print(eval_expr_lambda(sub_val("(define (f x y z) (* z (+ x y)))", ['2', '1', '1'])))#make string rep of args
     #print(lamb_expr)
@@ -185,9 +200,12 @@ def add_func_neu(rfunc):
 add_func("(define (f x y z) (* z (+ x y)))")
 print(eval_expr_lambda("(f 2 1 1)"))
 
+add_func("(define (fac n) (if (= n 1) 1 (* n (fac (- n 1)))))")
+#print(functions['fac'])
+#print(eval_expr_lambda("(fac 1)"))
 #expi = lambda x: lambda y: lambda z: eval_expr_lambda(sub_val("(define (f x y z) (* z (+ x y)))", [x, y, z]))
 #print("Example: ", expi('1')('2')('2'))
-
+#print(eval_expr_lambda("()"))
 expr = "(+ 9 0 9 (f (- (f 2 1 1) 1) 1 1) (- 9 8 ) (* 2 4 (- 8 9 ) (/ 7 6)))"
 print(eval_expr_lambda(expr))
 #print(eval_expr_lambda("(true 9 8)"))
@@ -197,6 +215,28 @@ print(eval_expr_lambda(expr))
 
 #fac = lambda n : 1 if n == 0 else n * fac(n-1)
 #print(fac(5))
-print(eval_expr_lambda("(if true 9 8)"))
+print(eval_expr_lambda("(if (= 4 4) 9   ( if    (= 4 4)  2  3) )"))#Testing variability of whitespacing
+print(eval_expr_lambda("(= 4 4)"))
 iff = lambda a: (lambda b: (lambda c: b if(a) else c))
 #print(iff(False)(2)("idk"))
+
+#Y = lambda f: (lambda x: f(f(x)))(lambda x: f(f(x)))
+Y = lambda f: lambda x: f(Y(f))(x)
+F = lambda f: (lambda n: 1 if(n==0) else (n*f(n-1)))
+#print(F(Y(F))(3))
+print(F(F(F(F(F(F(F(F(F(F)))))))))(6)) #Without the y-combinator
+print(Y(F)(9)) #Using the y-combinator
+'''
+def fac(f, n):
+    t = f
+    while True:
+        t = f(t(n-1))
+    return t
+'''
+#def f(n):
+
+
+
+#print(F(Y(F))(5))
+#print(F(Y(F))(5))
+#print(F)
