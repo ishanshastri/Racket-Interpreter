@@ -13,6 +13,11 @@ functions['/'] = lambda a: (lambda b:a/b)
 functions['expt'] = lambda a: (lambda b:a**b)
 functions['abs'] = lambda a: abs(a)
 
+#list functions
+functions['cons'] = lambda a: (lambda b: [a] + b)
+functions['append'] = lambda a: (lambda b: b + [a])
+functions['list'] = lambda a: (lambda b: (a if(isinstance(a, list)) else [a]) + [b])
+#functions['append'] = functions['list']
 #Bool Funcs
 functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))#__freeze(not(a), c)))
 functions['or'] = lambda a: (lambda b: a or b)
@@ -159,8 +164,11 @@ def sub_val(expr, args):
     """args must be in correct order, args are chars"""
     params = get_func_def(expr)[1]
     #print(expr)
+    #print(get_func_def(expr)[0])
+    if get_func_def(expr)[0] in get_raw_body(expr):
+        print("recursive")
     subbed_exp = repl(get_raw_body(expr), params, args)
-    #print(subbed_exp)
+    print(subbed_exp)
     return subbed_exp
 
 #print(sub_val("(define (f x y z) (* z (+ x y)))", ['1', '1', '5']))
@@ -201,13 +209,15 @@ add_func("(define (f x y z) (* z (+ x y)))")
 print(eval_expr_lambda("(f 2 1 1)"))
 
 add_func("(define (fac n) (if (= n 1) 1 (* n (fac (- n 1)))))")
+#add_func("(define (facc n) (Y fac))")
 #print(functions['fac'])
-#print(eval_expr_lambda("(fac 1)"))
+#print(eval_expr_lambda("(Y fac)"))
 #expi = lambda x: lambda y: lambda z: eval_expr_lambda(sub_val("(define (f x y z) (* z (+ x y)))", [x, y, z]))
 #print("Example: ", expi('1')('2')('2'))
 #print(eval_expr_lambda("()"))
 expr = "(+ 9 0 9 (f (- (f 2 1 1) 1) 1 1) (- 9 8 ) (* 2 4 (- 8 9 ) (/ 7 6)))"
 print(eval_expr_lambda(expr))
+print(eval_expr_lambda("(list 1 3 4 (cons -1 (append 6 (list 2 4 2))))"))
 #print(eval_expr_lambda("(true 9 8)"))
 #print(petvalu_expr("(define (f x y z) (* z (+ x y)))"))
 #run(expr) #input string from file
