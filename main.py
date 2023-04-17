@@ -17,6 +17,8 @@ functions['abs'] = lambda a: abs(a)
 functions['cons'] = lambda a: (lambda b: [a] + b)
 functions['append'] = lambda a: (lambda b: b + [a])
 functions['list'] = lambda a: (lambda b: (a if(isinstance(a, list)) else [a]) + [b])
+functions['first'] = lambda l: l[0]
+functions['rest'] = lambda l: l[1:]
 #functions['append'] = functions['list']
 #Bool Funcs
 functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))#__freeze(not(a), c)))
