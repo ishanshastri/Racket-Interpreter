@@ -22,11 +22,13 @@ functions['second'] = lambda l: functions['first'](functions['rest'](l))
 functions['rest'] = lambda l: l[1:]
 #functions['append'] = functions['list']
 #Bool Funcs
-functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))#__freeze(not(a), c)))
+functions['if'] = lambda a: (lambda b: (lambda c: b if(a) else c))#__freeze(not(a), c))) ;else c(0)
 functions['or'] = lambda a: (lambda b: a or b)
 functions['and'] = lambda a: (lambda b: a and b)
 functions['='] = lambda a: (lambda b: (a==b))
 functions['Y'] = lambda f: lambda x: f(Y(f))(x)#lambda f: (lambda x: f())
+
+functions['if_laz'] = lambda a: (lambda b: (lambda c: b if(a) else c(0)))
 #def new_function(rfunc):
     
 #Complicated Funcsions#
@@ -116,17 +118,27 @@ def eval_expr_lambda(exp):
         elif exp=="false":
             return False
         else:
-            return float(exp) # Revise for non-numerical cases
+            return float(exp)
+            try:
+                return float(exp)
+            except:
+                return exp
+             # Revise for non-numerical cases
 
     exp = extr_expr(exp)
+    #print
     op = exp[0]
 
     func = functions[op]
     args = exp[1][1:]
+    #print(args)
+    #print("op: ", op)
     res = func(eval_expr_lambda(exp[1][0]))
     for a in args:
         #res = res(a)
-        if is_function(res):
+        #if a in op:
+        #    print("d")
+        if is_function(res):  
             res = res(eval_expr_lambda(a))
         else:
             res = func(res)(eval_expr_lambda(a))
@@ -169,6 +181,7 @@ def sub_val(expr, args):
     #print(expr)
     #print(get_func_def(expr)[0])
     if get_func_def(expr)[0] in get_raw_body(expr):
+        #get_raw_body = get_raw_body.replace()
         print("recursive")
     subbed_exp = repl(get_raw_body(expr), params, args)
     #print(subbed_exp)
@@ -191,6 +204,7 @@ def add_func(rfunc):
     # F = lambda fac: (lambda n: eval_expr(sub_val(n, fac)))
     #functions['fac'] = lambda n: Y(F)(n)
     #functions['fac'] = lambda n: Y( lambda fac: (lambda n: eval_expr(sub_val(n, fac))) )(n)
+    #functions['fac'] = lambda n: Y( lambda fac: (lambda n: (if n==0 -> 1) else (n*fac(n-1))) )(n)
 
     #print(lamb_expr)
     #print(str(ast.literal_eval(args)))
@@ -208,8 +222,17 @@ def add_func(rfunc):
     curried_args = ''
     for a in args:
         curried_args += '(' + a + ')'
-    F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + get_func_def(rfunc)[0] + curried_args
-    if (get_func_def(rfunc)[0]=="fac"):#stub
+    #F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + get_func_def(rfunc)[0] + curried_args
+    #F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + 'eval_expr_lambda(\"' + get_raw_body(rfunc) + '\")'
+    #F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + '1 if (n==0) else (n*(fac(n-1)))'
+    #F = 'lambda ' + get_func_def(rfunc)[0] + '_0:' + lam_ext + 'eval_expr_lambda(sub_val(\"' + rfunc.replace(get_func_def(rfunc)[0], get_func_def(rfunc)[0] + '_0') + '\", ' +  stringified_args + '))'
+    #F = 'lambda ' + get_func_def(rfunc)[0] + '_0:' + lam_ext + '(lambda a: (lambda b: (lambda c: b if(a) else c)))(n==0)(1)(n*fac_0(n-1))'
+    #F = 'lambda ' + get_func_def(rfunc)[0] + '_0:' + lam_ext + 'functions[\'if\'](n==0)(1)(n*fac_0(n-1))'
+    #WORKS F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + 'functions[\'if_laz\'](n==0)(1)(lambda b: n*fac(n-1))'
+    #F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + 'eval_expr_lambda(sub_val(\"' + rfunc + '\", ' +  stringified_args + '))'
+    F = 'lambda ' + get_func_def(rfunc)[0] + ':' + lam_ext + 'functions[\'if_laz\'](n==0)(1)(lambda b: n*fac(n-1))'
+    print(F)
+    if (get_func_def(rfunc)[0]=="fac"):#stub; check for recursive function
         lamb_expr += 'Y(' + F + ')'
         for a in args:
             lamb_expr += '(' + a + ')'
@@ -237,7 +260,9 @@ def add_func_neu(rfunc):
 add_func("(define (f x y z) (* z (+ x y)))")
 print(eval_expr_lambda("(f 2 1 1)"))
 
-add_func("(define (fac n) (if (= n 1) 1 (* n (fac (- n 1)))))")
+add_func("(define (fac n) (if (= n 1) 1 (* n (fac (- n 1))))")
+#add_func("(define (fac n) (if_laz (= n 1) 1 (lambda x: (* n (fac (- n 1))))))")
+
 print(eval_expr_lambda("(fac 5)"))
 
 #add_func("(define (facc n) (Y fac))")
@@ -273,6 +298,10 @@ F = lambda f: (lambda n: 1 if(n==0) else (n*f(n-1)))
 #print(F(Y(F))(3))
 print(F(F(F(F(F(F(F(F(F(F)))))))))(6)) #Without the y-combinator
 print(Y(F)(9)) #Using the y-combinator
+
+my_combed_fac = lambda m: Y(lambda f: (lambda n: (lambda a, b, c: b if(a) else c(0))(n==0, 1, lambda b: n*f(n-1))))(m)#Y(lambda f: (lambda n: lambda a, b, c: b if(a) else c)(n==0, 1, n*f(n-1)))(n)
+#my_combed_fac = lambda m: Y(lambda f: (lambda n: (lambda a, b, c: b if(a) else c)(n==0, 1, (lambda b: n*f(n-1))(0))))(m)
+print(my_combed_fac(5))
 '''
 def fac(f, n):
     t = f
@@ -287,3 +316,40 @@ def fac(f, n):
 #print(F(Y(F))(5))
 #print(F(Y(F))(5))
 #print(F)
+
+
+'''
+def symbolic_eval(exp):
+        #print(exp)
+    if '(' not in exp:
+        if exp=="true":
+            return True
+        elif exp=="false":
+            return False
+        else:
+            return float(exp)
+            try:
+                return float(exp)
+            except:
+                return exp
+             # Revise for non-numerical cases
+
+    exp = extr_expr(exp)
+    #print
+    op = exp[0]
+
+    func = functions[op]
+    args = exp[1][1:]
+    res = func(eval_expr_lambda(exp[1][0]))
+    for a in args:
+        #res = res(a)
+        if is_function(res):
+            res = res(eval_expr_lambda(a))
+        else:
+            res = func(res)(eval_expr_lambda(a))
+    return res
+'''
+#print((lambda a: (lambda b: (lambda c: b if(a) else c)))(0==1)(1)(2))
+
+fukk = lambda n: Y(lambda fac_0:lambda n: (lambda a: (lambda b: (lambda c: b if(a) else c)))(n==0)(1)(n*fac_0(n-1)))(n)
+#print(fukk(3))
